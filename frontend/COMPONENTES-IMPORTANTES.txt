@@ -1,0 +1,111 @@
+SISTEMA DE GESTION ACADEMICA
+Guia de los archivos dentro de src/
+
+Este documento describe la responsabilidad de cada archivo del frontend.
+Los archivos .tsx contienen componentes de React; los .ts contienen tipos,
+datos o funciones de apoyo; index.css define los estilos globales.
+
+1. src/App.tsx
+   Es el componente principal y conecta las pantallas del sistema. Mantiene
+   el estado de navegación, estudiantes, sesión docente y conexión con el
+   backend. Al iniciar, comprueba el backend e intenta cargar los alumnos.
+   Coordina el inicio de sesión, cierre de sesión, matrícula, eliminación y
+   actualización de notas; actualiza la interfaz y solicita guardar los
+   cambios mediante los servicios. También calcula las métricas del inicio,
+   muestra notificaciones, la barra de navegación y el pie de página.
+
+2. src/main.tsx
+   Es el punto de entrada de React. Busca el elemento HTML con id "root",
+   monta allí el componente App e importa los estilos globales de index.css.
+
+3. src/index.css
+   Carga Tailwind CSS para que las clases de utilidad utilizadas por los
+   componentes definan el diseño y los estilos de la interfaz.
+
+4. src/academico/tipos.ts
+   Declara los tipos de datos compartidos por el frontend:
+   - PeriodoId: los cuatro bimestres del año.
+   - NotaPeriodo: notas N1, N2, N3 y porcentaje de asistencia.
+   - CursoData: información del curso y sus notas por bimestre.
+   - AlumnoData: datos del estudiante, estado y cursos.
+   - VistaRuta: nombres permitidos para las pantallas principales.
+   Estos tipos ayudan a validar la estructura de los datos durante el
+   desarrollo.
+
+5. src/academico/datos.ts
+   Contiene los nombres y fechas de los bimestres, los cursos predeterminados
+   y los estudiantes de demostración con sus calificaciones. Incluye
+   funciones para calcular el promedio ponderado de un bimestre (N1 30%,
+   N2 30%, N3 40%), el promedio anual de un curso o estudiante y la
+   asistencia anual. También crea los cursos vacíos que se asignan al
+   matricular a un estudiante nuevo.
+
+6. src/inicio/Inicio.tsx
+   Presenta la página institucional de bienvenida y el resumen del aula:
+   cantidad de estudiantes, promedio general, aprobación y asistencia.
+   Ofrece accesos a la consulta por DNI y muestra los estudiantes de
+   demostración para iniciar una consulta rápida.
+
+7. src/login/Login.tsx
+   Muestra el formulario de acceso docente, valida los campos y comunica
+   el inicio de sesión exitoso al componente App. La validación actual es
+   de demostración y usa credenciales escritas directamente en el código;
+   no representa autenticación segura de producción.
+
+8. src/consulta_dni/ConsultaDni.tsx
+   Permite buscar un estudiante por DNI, muestra un mensaje si no se
+   encuentra y presenta sus datos, promedios, asistencia y calificaciones.
+   Permite cambiar entre bimestres, consultar el resultado por curso y
+   descargar la boleta en PDF. También ofrece botones con los DNIs de los
+   estudiantes cargados para facilitar las pruebas.
+
+9. src/consulta_dni/generarBoletaPdf.ts
+   Construye y descarga una boleta en formato PDF usando jsPDF. Incluye
+   información del estudiante, periodo seleccionado, notas y asistencia
+   por curso, promedios bimestrales y anuales, condición académica, escala
+   de calificación y espacios de firma.
+
+10. src/dashboard/Dashboard.tsx
+    Es el panel de administración docente. Calcula y muestra métricas del
+    aula; permite filtrar estudiantes y elegir el periodo mostrado. Presenta
+    notas y promedios, y ofrece acciones para calificar, matricular, eliminar,
+    descargar boletas PDF y exportar el acta CSV. Abre los formularios y la
+    confirmación de eliminación y envía las acciones a App.
+
+11. src/dashboard/ModalCalificar.tsx
+    Muestra el formulario para editar las notas N1, N2, N3 y asistencia de
+    un estudiante en el bimestre activo. Permite cambiar de curso, limita
+    los valores a los rangos establecidos, calcula el promedio ponderado
+    en tiempo real y entrega las notas guardadas al Dashboard.
+
+12. src/dashboard/ModalMatricula.tsx
+    Muestra el formulario para registrar un estudiante. Valida que el DNI
+    tenga al menos ocho dígitos, que no esté repetido y que haya nombres y
+    apellidos. Crea el registro con los cursos y notas iniciales y lo envía
+    al Dashboard para matricularlo.
+
+13. src/dashboard/exportarCsv.ts
+    Genera un archivo CSV con la información de cada estudiante y sus notas
+    en el bimestre seleccionado, incluidos promedio, asistencia y condición.
+    Añade compatibilidad con hojas de cálculo y descarga el archivo en el
+    navegador.
+
+14. src/services/api.ts
+    Define las direcciones del backend y las funciones para comunicarse con
+    la API Go: verificar salud, obtener alumnos, buscar por DNI, matricular,
+    guardar calificaciones, eliminar y solicitar métricas. Si algunas
+    solicitudes fallan, registra el aviso y usa la respuesta local definida
+    por cada operación.
+
+15. src/services/index.ts
+    Reexporta las funciones de api.ts. Permite importarlas desde el módulo
+    services sin indicar directamente el nombre del archivo api.
+
+FLUJO GENERAL
+
+main.tsx monta App.tsx.
+App.tsx elige y conecta Inicio, Login, ConsultaDni y Dashboard.
+Dashboard permite gestionar estudiantes y calificaciones mediante sus
+formularios; App actualiza el estado y llama a services/api.ts para persistir
+los cambios en el backend. ConsultaDni usa los datos compartidos para mostrar
+notas y generarBoletaPdf.ts para crear la boleta descargable.
